@@ -1,6 +1,6 @@
-import crypto from 'crypto';
-
 const algorithm = 'aes-256-ctr';
+
+const crypto = window.crypto || window.msCrypto;
 
 class EncryptionManager {
   async generateLink(secret, passphrase, includePassphrase, duration) {
