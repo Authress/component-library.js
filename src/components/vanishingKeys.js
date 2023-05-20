@@ -142,6 +142,8 @@ async function decodeSecret(event) {
   if (decryptedSecret) {
     this.passphrase = passphrase;
     this.decryptedSecret = decryptedSecret;
+  } else {
+    this.decryptedSecret = 'NOT_FOUND';
   }
   this.requestUpdate();
 }
@@ -188,9 +190,10 @@ export default class VanishingKeys extends LitElement {
     if (secretId) {
       this.secretId = secretId;
       this.passphrase = passphrase;
+      this.requestUpdate();
     }
 
-    if (passphrase) {
+    if (secretId && passphrase) {
       decodeSecret.call(this, null, secretId, passphrase);
     }
   }
@@ -642,7 +645,9 @@ export default class VanishingKeys extends LitElement {
               >${[...Array(32)].join('•')}</textarea>
             </div>`
     // eslint-disable-next-line indent
-              : html`
+              : (this.decryptedSecret === 'NOT_FOUND'
+      ? html`<small class="text-danger">This secret is no longer available. It may have expired or has already been used.<small>`
+      : html`
               <div class="input-group mb-3 fs-exclude" data-hj-suppress data-sl="mask" style="cursor: pointer;" @click='${(e) => { copyToClipboard.call(this, this.decryptedSecret, e); }}'>
                 <textarea id="secret" class="form-control" disabled maxlength="10240" style="border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
                 >${this.decryptedSecret}</textarea>
@@ -654,7 +659,7 @@ export default class VanishingKeys extends LitElement {
               <div class="d-flex justify-content-center">
                 <small id="copied-text" class="${this.showCopiedToClipBoard ? '' : 'hidden'}">Secret copied to clipboard!</small>
               </div>
-              `}
+              `)}
             </form>
           </div>
         </div>
@@ -686,7 +691,7 @@ export default class VanishingKeys extends LitElement {
         ${this.getRender()}
       </div>
 
-      <div class="footer mt-auto pt-5 bg-light">
+      <div class="footer mt-auto py-5 bg-light">
         <div class="d-flex justify-content-center">
           <small>Secured by <a href="https://authress.io" class="text-highlight">Authress</a> -
             100% open source on <a class="text-highlight" href="https://github.com/Authress/vanishing-keys" target="_blank">GitHub</a>.</small>

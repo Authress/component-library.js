@@ -1,20 +1,15 @@
-const algorithm = 'aes-256-ctr';
 
 const crypto = window.crypto || window.msCrypto;
 
 class EncryptionManager {
   async generateLink(secret, passphrase, includePassphrase, duration) {
-    const sha256 = crypto.createHash('sha256');
-    sha256.update(passphrase);
+    const sha256key = await (window.crypto || window.msCrypto).subtle.digest('SHA-256', new TextEncoder().encode(passphrase));
+    const key = await crypto.subtle.importKey('raw', sha256key, 'AES-CTR', false, ['encrypt', 'decrypt']);
 
-    const initializationVector = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(algorithm, sha256.digest(), initializationVector);
-    const encryptedData = Buffer.concat([cipher.update(secret), cipher.final()]);
+    const initializationVector = await window.crypto.getRandomValues(new Uint8Array(16));
+    const encryptedData = await crypto.subtle.encrypt({ name: 'AES-CTR', counter: initializationVector, length: 128 }, key, new TextEncoder().encode(secret));
 
-    const encryptedSecret = Buffer.from(JSON.stringify({
-      data: encryptedData.toString('base64'),
-      iv: initializationVector.toString('base64')
-    })).toString('base64');
+    const encryptedSecret = `${btoa(String.fromCharCode(...new Uint8Array(encryptedData)))}~${btoa(String.fromCharCode(...new Uint8Array(initializationVector)))}`;
 
     const response = await fetch('https://vanish.authress.io/secrets', {
       method: 'POST',
@@ -37,19 +32,30 @@ class EncryptionManager {
 
   async decodeSecret(secretId, passphrase) {
     const response = await fetch(`https://vanish.authress.io/secrets/${secretId}`);
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      return null;
+    }
 
     if (response.status >= 400) {
       return null;
     }
+    const encryptedSecret = data.encryptedSecret;
 
-    const sha256 = crypto.createHash('sha256');
-    sha256.update(passphrase);
+    const sha256key = await (window.crypto || window.msCrypto).subtle.digest('SHA-256', new TextEncoder().encode(passphrase));
+    const key = await crypto.subtle.importKey('raw', sha256key, 'AES-CTR', false, ['encrypt', 'decrypt']);
 
-    const { data: encryptionData, iv: initializationVector } = JSON.parse(Buffer.from(data.encryptedSecret, 'base64').toString());
-    const decipher = crypto.createDecipheriv(algorithm, sha256.digest(), Buffer.from(initializationVector, 'base64'));
-    const decryptedSecret = Buffer.concat([decipher.update(Buffer.from(encryptionData, 'base64')), decipher.final()]);
-    return decryptedSecret.toString();
+    const [encryptionData, initializationVector] = encryptedSecret.split('~');
+
+    const decryptedData = await crypto.subtle.decrypt({
+      name: 'AES-CTR',
+      counter: Uint8Array.from(atob(initializationVector), c => c.charCodeAt(0)),
+      length: 128
+    }, key, Uint8Array.from(atob(encryptionData), c => c.charCodeAt(0)));
+
+    return new TextDecoder().decode(decryptedData);
   }
 }
 
