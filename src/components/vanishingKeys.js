@@ -18,6 +18,9 @@ function SetTheme() {
       :host {
         ${defaultColors.join(';\n')}
       }
+      .hidden {
+        visibility: hidden !important;
+      }
       .btn-outline-primary {
         color: var(--primary) !important;
         border-color: var(--primary) !important;
@@ -102,6 +105,7 @@ function SetTheme() {
 async function handleClick(event) {
   event.preventDefault();
 
+  this.loading = true;
   const radios = this.shadowRoot.querySelectorAll('input[name="lifetime"]');
 
   let lifetime = 'P7D';
@@ -116,16 +120,87 @@ async function handleClick(event) {
   const includePassphrase = this.shadowRoot.getElementById('includePassphrase').checked || !passphrase;
 
   const result = await encryptionManager.generateLink(secret, passphrase, includePassphrase, lifetime);
+  this.shareUrl = result;
+  this.loading = false;
+  this.showCopiedToClipBoard = false;
+
+  this.requestUpdate();
+}
+
+function resetUi(event) {
+  event.preventDefault();
+  this.shareUrl = null;
+  this.requestUpdate();
+}
+
+async function decodeSecret(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  const passphrase = this.passphrase || this.shadowRoot.getElementById('passphrase').value;
+  const decryptedSecret = await encryptionManager.decodeSecret(this.secretId, passphrase);
+  if (decryptedSecret) {
+    this.passphrase = passphrase;
+    this.decryptedSecret = decryptedSecret;
+  }
+  this.requestUpdate();
+}
+
+function copyToClipboard(copyData) {
+  let data = copyData?.trim().replace(/\s{8}/g, '  ');
+  try {
+    // Convert to 2 spaces in all JSON text
+    data = JSON.stringify(JSON.parse(data), null, 2).trim();
+  } catch (error) {
+    // Ignore non JSON text;
+  }
+  
+  const textArea = document.createElement('textarea');
+  textArea.value = data;
+  textArea.style.position = 'fixed'; // avoid scrolling to bottom
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    this.showCopiedToClipBoard = true;
+    this.requestUpdate();
+    setTimeout(() => {
+      this.showCopiedToClipBoard = false;
+      this.requestUpdate();
+    }, 5000);
+  } catch (err) {
+    console.error('Unable to copy', err); // eslint-disable-line no-console
+  }
+  document.body.removeChild(textArea);
 }
 
 export default class VanishingKeys extends LitElement {
   constructor() {
     super();
-    // this.loading = true;
+    this.shareUrl = null;
+    this.loading = false;
+
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    const queryParams = new URLSearchParams(window.location.search);
+    const secretId = queryParams.get('secretId') || hashParams.get('secretId');
+    const passphrase = queryParams.get('passphrase') || hashParams.get('passphrase');
+    if (secretId) {
+      this.secretId = secretId;
+      this.passphrase = passphrase;
+    }
+
+    if (passphrase) {
+      decodeSecret.call(this, null, secretId, passphrase);
+    }
   }
 
   static get properties() {
-    return {};
+    return {
+      loading: { type: Boolean },
+      shareUrl: { type: String },
+      showResolveSecret: { type: Boolean }
+    };
   }
 
   static finalizeStyles() {
@@ -391,15 +466,8 @@ export default class VanishingKeys extends LitElement {
     super.disconnectedCallback();
   }
 
-  render() {
+  inputDisplay() {
     return html`
-      ${SetTheme.call(this)}
-      <div class="d-panel">
-        <div class="d-panel-header">
-          <h3 class="d-flex align-items-center justify-content-center">
-            <strong>Authress Vanishing Keys</strong>
-          </h3>
-        </div>
         <div class="d-flex justify-content-center w-100">
           <div>
             <div style="text-align: center">
@@ -412,8 +480,7 @@ export default class VanishingKeys extends LitElement {
               <h4 class="title">Secret:</h4>  
               <div class="text-input fs-exclude" data-hj-suppress data-sl="mask">
                 <textarea id="secret" maxlength="10240" style="width: 100%; border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
-                  placeholder="Secret content goes here...">
-                </textarea>
+                  placeholder="Secret content goes here..."></textarea>
               </div>
 
               <br>
@@ -462,8 +529,32 @@ export default class VanishingKeys extends LitElement {
                     </label>
                   </div>
                   <br>
-                  <button type="submit" class="create btn btn-outline-primary">
-                    Generate one time secret link
+                  <button type="submit" class="d-flex justify-content-center align-items-center btn btn-outline-primary" style="width: 235px; height: 38px">
+                    ${this.loading ? html`
+                    <svg height="16px" width="16px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                       viewBox="0 0 512 512"  xml:space="preserve">
+                    <style type="text/css">
+                      .st0{fill:#000000;}
+                    </style>
+                    <g>
+                      <path class="st0" d="M256,0c-23.357,0-42.297,18.932-42.297,42.288c0,23.358,18.94,42.288,42.297,42.288
+                        c23.357,0,42.279-18.93,42.279-42.288C298.279,18.932,279.357,0,256,0z"/>
+                      <path class="st0" d="M256,427.424c-23.357,0-42.297,18.931-42.297,42.288C213.703,493.07,232.643,512,256,512
+                        c23.357,0,42.279-18.93,42.279-42.288C298.279,446.355,279.357,427.424,256,427.424z"/>
+                      <path class="st0" d="M74.974,74.983c-16.52,16.511-16.52,43.286,0,59.806c16.52,16.52,43.287,16.52,59.806,0
+                        c16.52-16.511,16.52-43.286,0-59.806C118.261,58.463,91.494,58.463,74.974,74.983z"/>
+                      <path class="st0" d="M377.203,377.211c-16.503,16.52-16.503,43.296,0,59.815c16.519,16.52,43.304,16.52,59.806,0
+                        c16.52-16.51,16.52-43.295,0-59.815C420.489,360.692,393.722,360.7,377.203,377.211z"/>
+                      <path class="st0" d="M84.567,256c0.018-23.348-18.922-42.279-42.279-42.279c-23.357-0.009-42.297,18.932-42.279,42.288
+                        c-0.018,23.348,18.904,42.279,42.279,42.279C65.645,298.288,84.567,279.358,84.567,256z"/>
+                      <path class="st0" d="M469.712,213.712c-23.357,0-42.279,18.941-42.297,42.288c0,23.358,18.94,42.288,42.297,42.297
+                        c23.357,0,42.297-18.94,42.279-42.297C512.009,232.652,493.069,213.712,469.712,213.712z"/>
+                      <path class="st0" d="M74.991,377.22c-16.519,16.511-16.519,43.296,0,59.806c16.503,16.52,43.27,16.52,59.789,0
+                        c16.52-16.519,16.52-43.295,0-59.815C118.278,360.692,91.511,360.692,74.991,377.22z"/>
+                      <path class="st0" d="M437.026,134.798c16.52-16.52,16.52-43.304,0-59.824c-16.519-16.511-43.304-16.52-59.823,0
+                        c-16.52,16.52-16.503,43.295,0,59.815C393.722,151.309,420.507,151.309,437.026,134.798z"/>
+                    </g>
+                    </svg>` : 'Generate one time secret link'}
                   </button>
                 </div>
               </div>
@@ -471,6 +562,128 @@ export default class VanishingKeys extends LitElement {
             </form>
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  secretGeneratedDisplay() {
+    return html`
+        <div class="d-flex justify-content-center w-100">
+          <div>
+            <div style="text-align: center">
+              <span>Paste a secret, credential, api key, or private message below.</span>
+              <br>
+              <small>And then share it securely with anyone. The secret will only be visible once and then is burned.</small>
+            </div>
+            <br>
+            <div>
+              <h4 class="title">Share this link:</h4>
+              <div class="input-group mb-3" style="cursor: pointer;" @click='${(e) => { copyToClipboard.call(this, this.shareUrl, e); }}'>
+                <input style="cursor: pointer;"
+                  disabled type="text" class="form-control text-input fs-exclude" data-hj-suppress data-sl="mask" aria-label="Secret share link" aria-describedby="secret-share-link" value="${this.shareUrl}">
+                <span class="input-group-text" id="secret-share-link">
+                  <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 8V7C10 6.05719 10 5.58579 10.2929 5.29289C10.5858 5 11.0572 5 12 5H17C17.9428 5 18.4142 5 18.7071 5.29289C19 5.58579 19 6.05719 19 7V12C19 12.9428 19 13.4142 18.7071 13.7071C18.4142 14 17.9428 14 17 14H16M7 19H12C12.9428 19 13.4142 19 13.7071 18.7071C14 18.4142 14 17.9428 14 17V12C14 11.0572 14 10.5858 13.7071 10.2929C13.4142 10 12.9428 10 12 10H7C6.05719 10 5.58579 10 5.29289 10.2929C5 10.5858 5 11.0572 5 12V17C5 17.9428 5 18.4142 5.29289 18.7071C5.58579 19 6.05719 19 7 19Z" stroke="#464455" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+
+              <div class="d-flex justify-content-center">
+                <small id="copied-text" class="${this.showCopiedToClipBoard ? '' : 'hidden'}">Share link copied to clipboard!</small>
+              </div>
+
+              <hr class="w-100">
+              <div class="d-flex justify-content-center">
+                <div>
+                  <button type="submit" class="create btn btn-outline-primary" @click="${(e) => { resetUi.call(this, e); }}">
+                    Create another secret
+                  </button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  resolveSecretDisplay() {
+    return html`
+        <div class="d-flex justify-content-center w-100">
+          <div>
+            <div style="text-align: center">
+              <span>Paste a secret, credential, api key, or private message below.</span>
+              <br>
+              <small>And then share it securely with anyone. The secret will only be visible once and then is burned.</small>
+            </div>
+            <br>
+            <form @submit="${(e) => { decodeSecret.call(this, e); }}">
+              <div>
+                <h4 class="title">Enter Passphrase:</h4>
+                <div class="input-group">
+                  <span class="input-group-text" id="passphrase-label">Passphrase</span>
+                  ${this.decryptedSecret
+    // eslint-disable-next-line indent
+                  ? html`<input id="passphrase" type="text" class="form-control fs-exclude" data-hj-suppress data-sl="mask" autocomplete="off" disabled value=${[...Array(32)].join('•')}>`
+    // eslint-disable-next-line indent
+                  : html`
+                  <input id="passphrase" type="text" class="form-control fs-exclude" data-hj-suppress data-sl="mask" autocomplete="off" placeholder="Enter the passphrase for this secret" aria-label="Passphrase" aria-describedby="passphrase-label">
+                  <button class="btn btn-outline-secondary" type="submit">Decode</button>`}
+                </div>
+                <div class="mt-1"><small>The passphrase is used to decrypt the secret.</small></div>
+              </div>
+
+              <hr>
+
+              <h4 class="title">Shared Secret:</h4>  
+              ${!this.decryptedSecret
+    // eslint-disable-next-line indent
+              ? html`<div class="text-input">
+              <textarea id="secret" disabled maxlength="10240" style="width: 100%; border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
+              >${[...Array(32)].join('•')}</textarea>
+            </div>`
+    // eslint-disable-next-line indent
+              : html`
+              <div class="input-group mb-3 fs-exclude" data-hj-suppress data-sl="mask" style="cursor: pointer;" @click='${(e) => { copyToClipboard.call(this, this.decryptedSecret, e); }}'>
+                <textarea id="secret" class="form-control" disabled maxlength="10240" style="border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
+                >${this.decryptedSecret}</textarea>
+                <span class="input-group-text" id="secret-share-link">
+                  <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 8V7C10 6.05719 10 5.58579 10.2929 5.29289C10.5858 5 11.0572 5 12 5H17C17.9428 5 18.4142 5 18.7071 5.29289C19 5.58579 19 6.05719 19 7V12C19 12.9428 19 13.4142 18.7071 13.7071C18.4142 14 17.9428 14 17 14H16M7 19H12C12.9428 19 13.4142 19 13.7071 18.7071C14 18.4142 14 17.9428 14 17V12C14 11.0572 14 10.5858 13.7071 10.2929C13.4142 10 12.9428 10 12 10H7C6.05719 10 5.58579 10 5.29289 10.2929C5 10.5858 5 11.0572 5 12V17C5 17.9428 5 18.4142 5.29289 18.7071C5.58579 19 6.05719 19 7 19Z" stroke="#464455" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+              
+              <div class="d-flex justify-content-center">
+                <small id="copied-text" class="${this.showCopiedToClipBoard ? '' : 'hidden'}">Secret copied to clipboard!</small>
+              </div>
+              `}
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  getRender() {
+    if (this.shareUrl) {
+      return this.secretGeneratedDisplay();
+    }
+
+    if (this.secretId) {
+      return this.resolveSecretDisplay();
+    }
+
+    return this.inputDisplay();
+  }
+
+  render() {
+    return html`
+      ${SetTheme.call(this)}
+      <div class="d-panel">
+        <div class="d-panel-header">
+          <h3 class="d-flex align-items-center justify-content-center">
+            <strong>Authress Vanishing Keys</strong>
+          </h3>
+        </div>
+        ${this.getRender()}
       </div>
 
       <div class="footer mt-auto pt-5 bg-light">
