@@ -589,15 +589,18 @@ export default class VanishingKeys extends LitElement {
                 </span>
               </div>
 
-              <div class="d-flex justify-content-center">
+              <div class="d-flex justify-content-center text-success">
                 <small id="copied-text" class="${this.showCopiedToClipBoard ? '' : 'hidden'}">Share link copied to clipboard!</small>
               </div>
 
               <hr class="w-100">
               <div class="d-flex justify-content-center">
                 <div>
-                  <button type="submit" class="create btn btn-outline-primary" @click="${(e) => { resetUi.call(this, e); }}">
+                  <button type="submit" class="create btn btn-outline-primary me-2" @click="${(e) => { resetUi.call(this, e); }}">
                     Create another secret
+                  </button>
+                  <button type="submit" class="create btn btn-primary" @click="${(e) => { copyToClipboard.call(this, this.shareUrl, e); }}">
+                    Copy secret link
                   </button>
                 </div>
               </div>
@@ -649,15 +652,25 @@ export default class VanishingKeys extends LitElement {
       ? html`<small class="text-danger">This secret is no longer available. It may have expired or has already been used.<small>`
       : html`
               <div class="input-group mb-3 fs-exclude" data-hj-suppress data-sl="mask" style="cursor: pointer;" @click='${(e) => { copyToClipboard.call(this, this.decryptedSecret, e); }}'>
-                <textarea id="secret" class="form-control" disabled maxlength="10240" style="border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
+                <textarea id="secret" class="form-control" disabled maxlength="10240" style="cursor: pointer; border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
                 >${this.decryptedSecret}</textarea>
-                <span class="input-group-text" id="secret-share-link">
+                <span class="input-group-text" id="secret-share-link" style="cursor: pointer">
                   <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 8V7C10 6.05719 10 5.58579 10.2929 5.29289C10.5858 5 11.0572 5 12 5H17C17.9428 5 18.4142 5 18.7071 5.29289C19 5.58579 19 6.05719 19 7V12C19 12.9428 19 13.4142 18.7071 13.7071C18.4142 14 17.9428 14 17 14H16M7 19H12C12.9428 19 13.4142 19 13.7071 18.7071C14 18.4142 14 17.9428 14 17V12C14 11.0572 14 10.5858 13.7071 10.2929C13.4142 10 12.9428 10 12 10H7C6.05719 10 5.58579 10 5.29289 10.2929C5 10.5858 5 11.0572 5 12V17C5 17.9428 5 18.4142 5.29289 18.7071C5.58579 19 6.05719 19 7 19Z" stroke="#464455" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
               </div>
               
-              <div class="d-flex justify-content-center">
+              <div class="d-flex justify-content-center text-success">
                 <small id="copied-text" class="${this.showCopiedToClipBoard ? '' : 'hidden'}">Secret copied to clipboard!</small>
+              </div>
+              
+              <br>
+
+              <div class="d-flex justify-content-center">
+                <div>
+                  <button type="submit" class="create btn btn-primary" @click="${(e) => { copyToClipboard.call(this, this.decryptedSecret, e); }}">
+                    Copy Secret
+                  </button>
+                </div>
               </div>
               `)}
             </form>
