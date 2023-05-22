@@ -11,37 +11,61 @@ class EncryptionManager {
 
     const encryptedSecret = `${btoa(String.fromCharCode(...new Uint8Array(encryptedData)))}~${btoa(String.fromCharCode(...new Uint8Array(initializationVector)))}`;
 
-    const response = await fetch('https://vanish.authress.io/secrets', {
-      method: 'POST',
-      body: JSON.stringify({
-        encryptedSecret,
-        duration
-      })
-    });
+    for (let iteration = 0; iteration < 5; iteration++) {
+      try {
+        const response = await fetch('https://vanish.authress.io/secrets', {
+          method: 'POST',
+          body: JSON.stringify({
+            encryptedSecret,
+            duration
+          })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    const queryString = new URLSearchParams();
-    queryString.set('secretId', data.secretId);
-    if (includePassphrase) {
-      queryString.set('passphrase', passphrase);
+        const queryString = new URLSearchParams();
+        queryString.set('secretId', data.secretId);
+        if (includePassphrase) {
+          queryString.set('passphrase', passphrase);
+        }
+        const urlLink = new URL(`${window.location.origin}${window.location.pathname}#/vanish?${queryString.toString()}`);
+        return urlLink.toString();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error attempting to store secret', error);
+        await new Promise(resolve => setTimeout(resolve, 20 * 2 ** iteration));
+      }
     }
-    const urlLink = new URL(`${window.location.origin}${window.location.pathname}#/vanish?${queryString.toString()}`);
-    return urlLink.toString();
+
+    return null;
   }
 
   async decodeSecret(secretId, passphrase) {
-    const response = await fetch(`https://vanish.authress.io/secrets/${secretId}`);
     let data;
-    try {
-      data = await response.json();
-    } catch (error) {
-      return null;
+    for (let iteration = 0; iteration < 5; iteration++) {
+      try {
+        const response = await fetch(`https://vanish.authress.io/secrets/${secretId}`);
+        if (response.status >= 400) {
+          return null;
+        }
+
+        try {
+          data = await response.json();
+          break;
+        } catch (error) {
+          return null;
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error attempting to fetch secret', error);
+        await new Promise(resolve => setTimeout(resolve, 20 * 2 ** iteration));
+      }
     }
 
-    if (response.status >= 400) {
+    if (!data) {
       return null;
     }
+    
     const encryptedSecret = data.encryptedSecret;
 
     const sha256key = await (window.crypto || window.msCrypto).subtle.digest('SHA-256', new TextEncoder().encode(passphrase));

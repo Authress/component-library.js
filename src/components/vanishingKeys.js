@@ -120,6 +120,10 @@ async function handleClick(event) {
   const includePassphrase = this.shadowRoot.getElementById('includePassphrase').checked || !passphrase;
 
   const result = await encryptionManager.generateLink(secret, passphrase, includePassphrase, lifetime);
+  if (!result) {
+    return;
+  }
+
   this.shareUrl = result;
   this.loading = false;
   this.showCopiedToClipBoard = false;
