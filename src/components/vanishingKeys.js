@@ -225,82 +225,6 @@ export default class VanishingKeys extends LitElement {
         margin-top: 1rem;
         padding: 2rem 3rem;
       }
-      .nav a.active, .footerNav a.active {
-        font-weight: bolder;
-      }
-      
-      #logo {
-        padding: 0px;
-        margin-top: 10px;
-      }
-      
-      #banner {
-        width: 100%;
-        background-color: #f0f0f0;
-        margin: 0px;
-        padding: 0px;
-        margin-bottom: 0px;
-        border-bottom: 4px solid red; /* dd4a22, d22000, b04420 */
-      }
-      
-      #banner .broadcast {
-        text-align: center;
-        color: #000;
-        font-weight: bolder;
-      }
-      
-      #banner .broadcast a {
-        text-decoration: underline;
-      }
-      
-      #createSecret {
-        text-align: left;
-      }
-      
-      #createSecret textarea, #createSecret input {
-        background-color: #f9f9f9;
-        padding: 6px !important;
-      }
-      
-      .btn-custom {
-        -webkit-font-smoothing: antialiased;
-        background-color: #dd4a22!important;
-        background-repeat: repeat-x;
-        background-image: none;
-        color: #fff!important;
-        border-color: #b04420 #b04420 hsl(15,69%,41%);
-        text-shadow: 0 -1px 0 rgba(0,0,0,0.00);
-        font-weight: bold;
-        font-size: 20px;
-      }
-      .btn-custom:hover {
-        background-color: #d22000 !important;
-        text-shadow: 1px 1px 0 #740500;
-      }
-      
-      #footer {
-      
-        text-align: center;
-        font-size: 80%;
-        line-height: 80%;
-        padding: 0px;
-        color: #999;
-      }
-      
-      #footer a {
-        color: #000;
-      }
-      
-      #footer p {
-        margin: 0px;
-        padding: 4px;
-      }
-      
-      #footer .intro {
-        color: #000; float: left; padding-left: 8px; font-style: italic;
-      }
-      
-      
       #info a {
         text-decoration: underline;
       }
@@ -317,24 +241,13 @@ export default class VanishingKeys extends LitElement {
         color: #000;
       }
       
-      a.keepgoing {
-        font-size: 120%;
-        font-weight: bolder;
-        padding: 10px;
-      }
-      
       .private .hint {
         font-style: italic;
         color: #999;
         font-size: 16px;
         text-align: center;
       }
-      
-      #faq {
-        margin-top: 60px;
-        color: #444;
-      }
-      
+
       .nav li.primary {line-height: 26px; font-size: 20px;}
       .nav li.secondary {font-size:16px; line-height: 16px}
       .nav li.alt {font-size:24px; line-height: 24px}
