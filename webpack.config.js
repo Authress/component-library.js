@@ -61,7 +61,7 @@ export default {
       new TerserPlugin({
         extractComments: {
           condition: /^\**!|@preserve|@license|@cc_on/i,
-          banner: (licenseFile) => `Email Linker ${version} | Author - Rhosys Developers | License information can be found in ${licenseFile} `,
+          banner: (licenseFile) => `Authress Component Library ${version} | Author - Authress Developers | License information can be found in ${licenseFile} `,
         },
       })
     ],
