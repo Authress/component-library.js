@@ -2,7 +2,7 @@
 import { LitElement, css, html } from 'lit';
 import { LoginClient } from '@authress/login';
 
-const loginClient = new LoginClient({ applicationId: '', authressLoginHostUrl: `https://${window.location.origin}` });
+const loginClient = new LoginClient({ applicationId: '', authressLoginHostUrl: window.location.origin });
 
 import Styles from '../../bootstrap';
 
