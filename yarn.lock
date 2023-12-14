@@ -10,10 +10,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@authress/login@^2.3.259":
-  version "2.3.259"
-  resolved "https://registry.yarnpkg.com/@authress/login/-/login-2.3.259.tgz#c71ffa5f3cfc9dbf70f87f80487e1fb50f7201e1"
-  integrity sha512-IrwNrusexnE2NP1b4vNI+RIS1JaqiM9siOWIvrBPXs0CN/bhG0AX3+ss4rqEKUXZlU94fKnxBxsttf/u1kL7ug==
+"@authress/login@^2.3.268":
+  version "2.3.268"
+  resolved "https://registry.yarnpkg.com/@authress/login/-/login-2.3.268.tgz#64b97c6572e8f45bda7b175013d2d3f9135af46e"
+  integrity sha512-l7v90b8BpvnslAJwGA764ijpXIhmfueqZGzTrBaP+CkfC7REkh2zfzYV7bR9/rzNQ+L/PYPV4SyVxsEzG4iwtg==
   dependencies:
     cookie "^0.5.0"
     lodash.take "^4.1.1"

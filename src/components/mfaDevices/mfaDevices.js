@@ -44,33 +44,44 @@ export default class MfaDevices extends LitElement {
     }
   }
 
-  async deleteDevice(deviceId) {
+  deleteDevice(deviceId) {
     logger.log('Removing device', deviceId);
-    try {
-      await loginClient.deleteDevice(deviceId);
-      this.devices = this.devices.filter(d => d.deviceId !== deviceId);
-      this.state = states.LIST;
-      this.requestUpdate();
-    } catch (error) {
-      logger.error('Failed to remove device', deviceId, error);
-    }
-  }
-
-  async registerDevice() {
     this.state = states.LOADING;
     this.requestUpdate();
-    const deviceName = this.shadowRoot.getElementById('deviceName').value;
-    logger.log('Registering new device', deviceName);
-    try {
-      const result = await loginClient.registerDevice({ name: deviceName });
-      this.devices.push(result);
-      this.state = states.LIST;
-    } catch (error) {
-      logger.error('Failed to register new device', error);
-      this.state = states.NEW;
-    }
 
+    setTimeout(async () => {
+      try {
+        await loginClient.deleteDevice(deviceId);
+        this.devices = this.devices.filter(d => d.deviceId !== deviceId);
+        this.state = states.LIST;
+      } catch (error) {
+        logger.error('Failed to remove device', deviceId, error);
+        this.state = states.DELETE;
+      }
+
+      this.requestUpdate();
+    });
+  }
+
+  registerDevice() {
+    this.state = states.LOADING;
     this.requestUpdate();
+
+    setTimeout(async () => {
+      const deviceNameElement = this.shadowRoot.getElementById('deviceName');
+      const deviceName = deviceNameElement && deviceNameElement.value;
+      logger.log('Registering new device', deviceName);
+      try {
+        const result = await loginClient.registerDevice({ name: deviceName });
+        this.devices.push(result);
+        this.state = states.LIST;
+      } catch (error) {
+        logger.error('Failed to register new device', error);
+        this.state = states.NEW;
+      }
+
+      this.requestUpdate();
+    }, 10);
   }
 
   static finalizeStyles() {
@@ -264,12 +275,12 @@ export default class MfaDevices extends LitElement {
 
   createNewDevice() {
     return html`
-    <div class="d-flex flex-column h-100">
-      <div class="mx-3">
+    <form class="d-flex flex-column h-100">
+      <div class="mx-3 my-3">
         <div class="d-flex align-items-center justify-content-center">
           <h3 class="mx-3">Add a new hardware device</h3>
         </div>
-        <form>
+        <div>
           <fieldset class="mt-3">
             <label class="input-label" for="recipientField">Device Name:</label>
             <div class="mt-2">
@@ -278,28 +289,36 @@ export default class MfaDevices extends LitElement {
               </div>
             </div>
           </fieldset>
-
-          <div class="d-flex justify-content-end mt-2">
-            <button type="submit" class="create-button btn btn-sm" @click="${e => { e.preventDefault(); this.registerDevice(); }}">
-              Continue
-            </button>
-          </div>
-        </form>
-      </div>
-      <div class="d-flex flex-grow-1 justify-content-between">
-        <div class="d-flex flex-grow-1 justify-content-around">
-          <div class="d-flex align-items-center">
-            <button style="width: 75px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
-              <span>
-                <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
-                  <path d="M6.04599,11.6767 C7.35323,9.47493 9.75524,8 12.5,8 C16.6421,8 20,11.3579 20,15.5 C20,16.0523 20.4477,16.5 21,16.5 C21.5523,16.5 22,16.0523 22,15.5 C22,10.2533 17.7467,6 12.5,6 C9.31864,6 6.50386,7.56337 4.78,9.96279 L4.24303,6.91751 C4.14713,6.37361 3.62847,6.01044 3.08458,6.10635 C2.54068,6.20225 2.17751,6.72091 2.27342,7.2648 L3.31531,13.1736 C3.36136,13.4348 3.50928,13.667 3.72654,13.8192 C4.0104,14.0179 4.38776,14.0542 4.70227,13.9445 L10.3826,12.9429 C10.9265,12.847 11.2897,12.3284 11.1938,11.7845 C11.0979,11.2406 10.5792,10.8774 10.0353,10.9733 L6.04599,11.6767 Z" stroke-width="0" fill="#09244B"></path></svg>
-              </span>
-              <span>Go back</span>
-            </button>
-          </div>
         </div>
       </div>
-    </div>`;
+
+      <div class="d-flex flex-grow-1 justify-content-around">
+        <div class="d-flex align-items-center">
+          <button type="submit" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+            <div class="d-flex flex-column justify-content-between align-items-center"> 
+              <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
+                <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
+                <path d="M6.04599,11.6767 C7.35323,9.47493 9.75524,8 12.5,8 C16.6421,8 20,11.3579 20,15.5 C20,16.0523 20.4477,16.5 21,16.5 C21.5523,16.5 22,16.0523 22,15.5 C22,10.2533 17.7467,6 12.5,6 C9.31864,6 6.50386,7.56337 4.78,9.96279 L4.24303,6.91751 C4.14713,6.37361 3.62847,6.01044 3.08458,6.10635 C2.54068,6.20225 2.17751,6.72091 2.27342,7.2648 L3.31531,13.1736 C3.36136,13.4348 3.50928,13.667 3.72654,13.8192 C4.0104,14.0179 4.38776,14.0542 4.70227,13.9445 L10.3826,12.9429 C10.9265,12.847 11.2897,12.3284 11.1938,11.7845 C11.0979,11.2406 10.5792,10.8774 10.0353,10.9733 L6.04599,11.6767 Z" stroke-width="0" fill="#09244B"></path></svg>
+              </div>
+              <div>Go back</div>
+            </div>
+          </button>
+        </div>
+        
+        <div class="d-flex align-items-center">
+          <button style="width: 75px; height: 88px;" class="back-button btn btn-sm" @click="${e => { e.preventDefault(); this.registerDevice(); }}">
+            <div class="d-flex flex-column justify-content-between align-items-center"> 
+              <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
+                <svg style="height:32px; width=32px;" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g sketch:type="MSLayerGroup" transform="translate(-464.000000, -1087.000000)" fill="#000000"> <path d="M480,1117 C472.268,1117 466,1110.73 466,1103 C466,1095.27 472.268,1089 480,1089 C487.732,1089 494,1095.27 494,1103 C494,1110.73 487.732,1117 480,1117 L480,1117 Z M480,1087 C471.163,1087 464,1094.16 464,1103 C464,1111.84 471.163,1119 480,1119 C488.837,1119 496,1111.84 496,1103 C496,1094.16 488.837,1087 480,1087 L480,1087 Z M486,1102 L481,1102 L481,1097 C481,1096.45 480.553,1096 480,1096 C479.447,1096 479,1096.45 479,1097 L479,1102 L474,1102 C473.447,1102 473,1102.45 473,1103 C473,1103.55 473.447,1104 474,1104 L479,1104 L479,1109 C479,1109.55 479.447,1110 480,1110 C480.553,1110 481,1109.55 481,1109 L481,1104 L486,1104 C486.553,1104 487,1103.55 487,1103 C487,1102.45 486.553,1102 486,1102 L486,1102 Z" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
+              </div>
+              <div>Continue</div>
+            </div>
+          </button>
+        </div>
+
+      </div>
+
+    </form>`;
   }
 
   removeDevice() {
@@ -318,24 +337,27 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around">
         <div class="d-flex align-items-center">
-          <button style="width: 75px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
-            <span>
-              <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
+          <button type="submit" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+            <div class="d-flex flex-column justify-content-between align-items-center"> 
+              <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
+                <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
                 <path d="M6.04599,11.6767 C7.35323,9.47493 9.75524,8 12.5,8 C16.6421,8 20,11.3579 20,15.5 C20,16.0523 20.4477,16.5 21,16.5 C21.5523,16.5 22,16.0523 22,15.5 C22,10.2533 17.7467,6 12.5,6 C9.31864,6 6.50386,7.56337 4.78,9.96279 L4.24303,6.91751 C4.14713,6.37361 3.62847,6.01044 3.08458,6.10635 C2.54068,6.20225 2.17751,6.72091 2.27342,7.2648 L3.31531,13.1736 C3.36136,13.4348 3.50928,13.667 3.72654,13.8192 C4.0104,14.0179 4.38776,14.0542 4.70227,13.9445 L10.3826,12.9429 C10.9265,12.847 11.2897,12.3284 11.1938,11.7845 C11.0979,11.2406 10.5792,10.8774 10.0353,10.9733 L6.04599,11.6767 Z" stroke-width="0" fill="#09244B"></path></svg>
-            </span>
-            <span>Go back</span>
+              </div>
+              <div>Go back</div>
+            </div>
           </button>
         </div>
         
         <div class="d-flex align-items-center">
-          <button style="width: 75px" class="delete-button btn btn-sm" @click="${() => { this.deleteDevice(this.modalDeviceId); }}">
-            <span>
-              <svg viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="2.304"></g>
-                <g><path d="M4.99997 8H6.5M6.5 8V18C6.5 19.1046 7.39543 20 8.5 20H15.5C16.6046 20 17.5 19.1046 17.5 18V8M6.5 8H17.5M17.5 8H19M9 5H15M9.99997 11.5V16.5M14 11.5V16.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
-              </svg>
-            </span>
-            <span>Delete</span>
+          <button style="width: 75px; height: 88px;" class="delete-button btn btn-sm" @click="${() => { this.deleteDevice(this.modalDeviceId); }}">
+            <div class="d-flex flex-column justify-content-between align-items-center"> 
+              <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
+                <svg height="32px" width="32px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g><path d="M4.99997 8H6.5M6.5 8V18C6.5 19.1046 7.39543 20 8.5 20H15.5C16.6046 20 17.5 19.1046 17.5 18V8M6.5 8H17.5M17.5 8H19M9 5H15M9.99997 11.5V16.5M14 11.5V16.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
+            </svg>
+              </div>
+              <div>Delete</div>
+            </div>
           </button>
         </div>
       </div>
