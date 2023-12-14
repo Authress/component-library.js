@@ -57,16 +57,20 @@ export default class MfaDevices extends LitElement {
   }
 
   async registerDevice() {
+    this.state = states.LOADING;
+    this.requestUpdate();
     const deviceName = this.shadowRoot.getElementById('deviceName').value;
     logger.log('Registering new device', deviceName);
     try {
       const result = await loginClient.registerDevice({ name: deviceName });
       this.devices.push(result);
       this.state = states.LIST;
-      this.requestUpdate();
     } catch (error) {
       logger.error('Failed to register new device', error);
+      this.state = states.NEW;
     }
+
+    this.requestUpdate();
   }
 
   static finalizeStyles() {
