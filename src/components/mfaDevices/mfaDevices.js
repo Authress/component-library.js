@@ -276,7 +276,7 @@ export default class MfaDevices extends LitElement {
 
   createNewDevice() {
     return html`
-    <form class="d-flex flex-column h-100">
+    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.registerDevice(); }}">
       <div class="mx-3 my-3">
         <div class="d-flex align-items-center justify-content-center">
           <h3 class="mx-3">Add a new hardware device</h3>
@@ -295,7 +295,7 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around">
         <div class="d-flex align-items-center">
-          <button style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
@@ -307,7 +307,7 @@ export default class MfaDevices extends LitElement {
         </div>
         
         <div class="d-flex align-items-center">
-          <button type="submit" style="width: 75px; height: 88px;" class="back-button btn btn-sm" @click="${e => { e.preventDefault(); this.registerDevice(); }}">
+          <button type="submit" style="width: 75px; height: 88px;" class="back-button btn btn-sm">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg style="height:32px; width=32px;" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g sketch:type="MSLayerGroup" transform="translate(-464.000000, -1087.000000)" fill="#000000"> <path d="M480,1117 C472.268,1117 466,1110.73 466,1103 C466,1095.27 472.268,1089 480,1089 C487.732,1089 494,1095.27 494,1103 C494,1110.73 487.732,1117 480,1117 L480,1117 Z M480,1087 C471.163,1087 464,1094.16 464,1103 C464,1111.84 471.163,1119 480,1119 C488.837,1119 496,1111.84 496,1103 C496,1094.16 488.837,1087 480,1087 L480,1087 Z M486,1102 L481,1102 L481,1097 C481,1096.45 480.553,1096 480,1096 C479.447,1096 479,1096.45 479,1097 L479,1102 L474,1102 C473.447,1102 473,1102.45 473,1103 C473,1103.55 473.447,1104 474,1104 L479,1104 L479,1109 C479,1109.55 479.447,1110 480,1110 C480.553,1110 481,1109.55 481,1109 L481,1104 L486,1104 C486.553,1104 487,1103.55 487,1103 C487,1102.45 486.553,1102 486,1102 L486,1102 Z" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
@@ -338,7 +338,7 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around">
         <div class="d-flex align-items-center">
-          <button style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
@@ -350,7 +350,7 @@ export default class MfaDevices extends LitElement {
         </div>
         
         <div class="d-flex align-items-center">
-          <button style="width: 75px; height: 88px;" class="delete-button btn btn-sm" @click="${() => { this.deleteDevice(this.modalDeviceId); }}">
+          <button type="button" style="width: 75px; height: 88px;" class="delete-button btn btn-sm" @click="${() => { this.deleteDevice(this.modalDeviceId); }}">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg height="32px" width="32px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -380,7 +380,7 @@ export default class MfaDevices extends LitElement {
         </div>
         ${displayTrash && html`
           <div>
-            <button class="delete-button p-0 btn btn-sm" @click="${() => { this.state = states.DELETE; this.modalDeviceId = device.deviceId; this.requestUpdate(); }}">
+            <button type="button" class="delete-button p-0 btn btn-sm" @click="${() => { this.state = states.DELETE; this.modalDeviceId = device.deviceId; this.requestUpdate(); }}">
               <svg height="24px" width="24px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="2.304"></g>
                 <g><path d="M4.99997 8H6.5M6.5 8V18C6.5 19.1046 7.39543 20 8.5 20H15.5C16.6046 20 17.5 19.1046 17.5 18V8M6.5 8H17.5M17.5 8H19M9 5H15M9.99997 11.5V16.5M14 11.5V16.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
@@ -392,7 +392,7 @@ export default class MfaDevices extends LitElement {
 
   listDisplay() {
     return html`
-    <form class="d-flex flex-column" class="max-height: 500px;">
+    <form class="d-flex flex-column" class="max-height: 500px;" @submit="${e => { e.preventDefault(); this.state = states.NEW; this.requestUpdate(); }}">
       <div class="mx-3">
         <h3 class="d-flex align-items-center justify-content-center">
           <span>Security Keys</span>
@@ -411,7 +411,7 @@ export default class MfaDevices extends LitElement {
           ${!this.devices.length && html`
             <div class="d-flex flex-grow-1 justify-content-around mt-3">
               <div class="d-flex align-items-center">
-                <button type="submit" class="back-button btn btn-sm" @click="${e => { e.preventDefault(); this.state = states.NEW; this.requestUpdate(); }}">
+                <button type="submit" class="back-button btn btn-sm">
                   <div class="d-flex flex-column justify-content-around p-3">
                     <div class="mb-2">
                       <svg style="height:32px; width=32px;" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g sketch:type="MSLayerGroup" transform="translate(-464.000000, -1087.000000)" fill="#000000"> <path d="M480,1117 C472.268,1117 466,1110.73 466,1103 C466,1095.27 472.268,1089 480,1089 C487.732,1089 494,1095.27 494,1103 C494,1110.73 487.732,1117 480,1117 L480,1117 Z M480,1087 C471.163,1087 464,1094.16 464,1103 C464,1111.84 471.163,1119 480,1119 C488.837,1119 496,1111.84 496,1103 C496,1094.16 488.837,1087 480,1087 L480,1087 Z M486,1102 L481,1102 L481,1097 C481,1096.45 480.553,1096 480,1096 C479.447,1096 479,1096.45 479,1097 L479,1102 L474,1102 C473.447,1102 473,1102.45 473,1103 C473,1103.55 473.447,1104 474,1104 L479,1104 L479,1109 C479,1109.55 479.447,1110 480,1110 C480.553,1110 481,1109.55 481,1109 L481,1104 L486,1104 C486.553,1104 487,1103.55 487,1103 C487,1102.45 486.553,1102 486,1102 L486,1102 Z" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
@@ -422,7 +422,7 @@ export default class MfaDevices extends LitElement {
               </div>
             </div>`
           || html`
-          <button type="submit" class="create-button btn btn-sm" @click="${e => { e.preventDefault(); this.state = states.NEW; this.requestUpdate(); }}">
+          <button type="submit" class="create-button btn btn-sm">
             <span class="d-flex align-items-baseline">
               <svg style="margin-right: 0.25rem; margin-top: 0.25rem; height:12px; width=12px;" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g sketch:type="MSLayerGroup" transform="translate(-464.000000, -1087.000000)" fill="#000000"> <path d="M480,1117 C472.268,1117 466,1110.73 466,1103 C466,1095.27 472.268,1089 480,1089 C487.732,1089 494,1095.27 494,1103 C494,1110.73 487.732,1117 480,1117 L480,1117 Z M480,1087 C471.163,1087 464,1094.16 464,1103 C464,1111.84 471.163,1119 480,1119 C488.837,1119 496,1111.84 496,1103 C496,1094.16 488.837,1087 480,1087 L480,1087 Z M486,1102 L481,1102 L481,1097 C481,1096.45 480.553,1096 480,1096 C479.447,1096 479,1096.45 479,1097 L479,1102 L474,1102 C473.447,1102 473,1102.45 473,1103 C473,1103.55 473.447,1104 474,1104 L479,1104 L479,1109 C479,1109.55 479.447,1110 480,1110 C480.553,1110 481,1109.55 481,1109 L481,1104 L486,1104 C486.553,1104 487,1103.55 487,1103 C487,1102.45 486.553,1102 486,1102 L486,1102 Z" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
               Add device
