@@ -1,3 +1,7 @@
+<p id="main" align="center">
+  <img src="https://authress.io/static/images/linkedin-banner.png" alt="Authress media banner">
+</p>
+
 # Authress Web Component Library
 This is the Authress web component library. It provides full featured web components to provide easy and direct integration with Authress.
 
