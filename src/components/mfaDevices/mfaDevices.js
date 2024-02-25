@@ -26,6 +26,7 @@ export default class MfaDevices extends LitElement {
     super();
     this.shareUrl = null;
 
+    this.error = null;
     this.state = states.LOADING;
     this.modalDeviceId = null;
     this.devices = [];
@@ -35,6 +36,7 @@ export default class MfaDevices extends LitElement {
 
   async fetchDevices() {
     try {
+      // Note: this waits until there is a session before attempting to fetch devices
       this.devices = await loginClient.getDevices();
 
       this.state = states.LIST;
@@ -77,6 +79,12 @@ export default class MfaDevices extends LitElement {
         this.devices.push(result);
         this.state = states.LIST;
       } catch (error) {
+        if (error.status === 422 && error.data && error.data.errorCode === 'InvalidDevice') {
+          logger.log('Failed to register new device because it is not supported', error);
+          this.state = states.NEW;
+          this.error = 'This device no longer supports security devices.';
+          return;
+        }
         logger.error('Failed to register new device', error);
         this.state = states.NEW;
       }
@@ -276,10 +284,10 @@ export default class MfaDevices extends LitElement {
 
   createNewDevice() {
     return html`
-    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.registerDevice(); }}">
+    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.error = null; this.registerDevice(); }}">
       <div class="mx-3 my-3">
         <div class="d-flex align-items-center justify-content-center">
-          <h3 class="mx-3">Add a new hardware device</h3>
+          <h3 class="mx-3">Add a new device</h3>
         </div>
         <div>
           <fieldset class="mt-3">
@@ -295,7 +303,7 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around">
         <div class="d-flex align-items-center">
-          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.error = null; this.state = states.LIST; this.requestUpdate(); }}">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
@@ -319,6 +327,12 @@ export default class MfaDevices extends LitElement {
 
       </div>
 
+      ${this.error ? html`
+      <br>
+      <div class="text-danger" style="width: 100%; display: flex; justify-content: center">
+        <span>${this.error}</span>
+      </div>` : ''}
+
     </form>`;
   }
 
@@ -338,7 +352,7 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around">
         <div class="d-flex align-items-center">
-          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.state = states.LIST; this.requestUpdate(); }}">
+          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.modalDeviceId = null; this.error = null; this.state = states.LIST; this.requestUpdate(); }}">
             <div class="d-flex flex-column justify-content-between align-items-center"> 
               <div style="height: 48px; width: 48px;" class="d-flex align-items-center justify-content-center">
                 <svg height="32px" width="32px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g>
@@ -380,7 +394,7 @@ export default class MfaDevices extends LitElement {
         </div>
         ${displayTrash && html`
           <div>
-            <button type="button" class="delete-button p-0 btn btn-sm" @click="${() => { this.state = states.DELETE; this.modalDeviceId = device.deviceId; this.requestUpdate(); }}">
+            <button type="button" class="delete-button p-0 btn btn-sm" @click="${() => { this.error = null; this.state = states.DELETE; this.modalDeviceId = device.deviceId; this.requestUpdate(); }}">
               <svg height="24px" width="24px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="2.304"></g>
                 <g><path d="M4.99997 8H6.5M6.5 8V18C6.5 19.1046 7.39543 20 8.5 20H15.5C16.6046 20 17.5 19.1046 17.5 18V8M6.5 8H17.5M17.5 8H19M9 5H15M9.99997 11.5V16.5M14 11.5V16.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
@@ -392,7 +406,7 @@ export default class MfaDevices extends LitElement {
 
   listDisplay() {
     return html`
-    <form class="d-flex flex-column" class="max-height: 500px;" @submit="${e => { e.preventDefault(); this.state = states.NEW; this.requestUpdate(); }}">
+    <form class="d-flex flex-column" class="max-height: 500px;" @submit="${e => { e.preventDefault(); this.error = null; this.state = states.NEW; this.requestUpdate(); }}">
       <div class="mx-3">
         <h3 class="d-flex align-items-center justify-content-center">
           <span>Security Keys</span>
