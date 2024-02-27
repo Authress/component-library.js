@@ -2,11 +2,10 @@
 import { LitElement, css, html } from 'lit';
 import { LoginClient } from '@authress/login';
 
-const loginClient = new LoginClient({ applicationId: '', authressLoginHostUrl: window.location.origin });
-
 import Styles from '../../bootstrap';
 
 const logger = console;
+const loginClient = new LoginClient({ applicationId: '', authressLoginHostUrl: window.location.origin }, logger);
 
 const states = {
   LOADING: 'LOADING',
@@ -86,6 +85,7 @@ export default class MfaDevices extends LitElement {
           return;
         }
         logger.error('Failed to register new device', error);
+        this.error = error.message || error.data && (error.data.title || error.data.errorCode);
         this.state = states.NEW;
       }
 
