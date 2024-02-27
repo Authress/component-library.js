@@ -82,17 +82,20 @@ export default class MfaDevices extends LitElement {
           logger.log('Failed to register new device because it is not supported', error);
           this.state = states.NEW;
           this.error = 'This device no longer supports security devices.';
+          this.requestUpdate();
           return;
         }
 
         // The operation was cancelled, just ignore the error;
         if (error.message && error.message.match('The operation either timed out or was not allowed')) {
           this.state = states.NEW;
+          this.error = null;
+          this.requestUpdate();
           return;
         }
         logger.error('Failed to register new device', error);
-        this.error = error.message || error.data && (error.data.title || error.data.errorCode);
         this.state = states.NEW;
+        this.error = error.message || error.data && (error.data.title || error.data.errorCode);
       }
 
       this.requestUpdate();
