@@ -16,9 +16,9 @@
     "@jridgewell/trace-mapping" "^0.3.24"
 
 "@authress/login@*":
-  version "2.3.304"
-  resolved "https://registry.yarnpkg.com/@authress/login/-/login-2.3.304.tgz#a947bc69c20fded108e016ce2cb5715fdbf3e8c3"
-  integrity sha512-Q9DFHx2yPMvODA9whAxqRdAmilvGuSLl8ntEPJl7EvOKUkgTKMIKRhLiTk0PAb9hdiiWSV0jspqteKn6BXDb8A==
+  version "2.3.305"
+  resolved "https://registry.yarnpkg.com/@authress/login/-/login-2.3.305.tgz#848ac414639f397338376a9cbd72437f9ab7cacc"
+  integrity sha512-2vuWxZ6nQiey5D7q6dJwz5Oo4yAgc//+Lkh0h22QK22ximt+G/7eWeW6K43AHhS8TAjVZlYWIMCSZzhJ86DBQw==
   dependencies:
     cookie "^0.5.0"
     lodash.take "^4.1.1"

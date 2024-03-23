@@ -124,7 +124,7 @@ export default class MfaDevices extends LitElement {
         return;
       }
 
-      if (error.status === 422 && error.data && error.data.errorCode === 'InvalidRequest') {
+      if (error.status === 422 && error.data && (error.data.errorCode === 'InvalidRequest' || error.data.errorCode === 'DeviceProcessingFailed')) {
         logger.log('Failed to register new device because the verification was incorrect.', error);
         this.error = 'The verification code was incorrect, please try again.';
         this.totpCode = null;
@@ -568,7 +568,7 @@ export default class MfaDevices extends LitElement {
     }
     this.totpCode = replacementCode;
 
-    if (this.totpCode.lenth === 6) {
+    if (this.totpCode.length === 6) {
       this.completeAuthenticatorRegistration();
     }
   }
