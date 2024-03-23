@@ -40,7 +40,7 @@
   ],
   "mode": "production",
   "dependencies": {
-    "@authress/login": "^2",
+    "@authress/login": "*",
     "base64url": "^3.0.1",
     "bootstrap": "4",
     "buffer": "^6.0.3",
@@ -62,7 +62,7 @@
     "start": "webpack serve --mode=development --port=8080",
     "serve": "serve -p 8080 mocks",
     "lint": "eslint --ext .js src",
-    "test": "ava tests/**/*.test.js"
+    "test": "mocha tests/**/*.test.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.14",
@@ -72,7 +72,6 @@
     "@babel/plugin-proposal-optional-chaining": "^7.18.9",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
     "@babel/preset-env": "^7.13.12",
-    "ava": "^4.3.3",
     "babel-loader": "^8.2.2",
     "babel-plugin-template-html-minifier": "^4.1.0",
     "chai": "^4.2.0",
