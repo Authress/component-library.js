@@ -386,7 +386,7 @@ export default class MfaDevices extends LitElement {
             <label class="input-label">Device Name:</label>
             <div class="mt-2">
               <div>
-                <input class="form-control" type="text" name="deviceName" id="deviceName" placeholder="Keychain Hardware Device" @change="${v => this.deviceName = v.target.value}"/>
+                <input class="form-control" type="text" name="deviceName" id="deviceName" placeholder="Keychain Hardware Device" @change="${v => this.deviceName = v.target.value}">
               </div>
             </div>
           </fieldset>
@@ -603,7 +603,7 @@ export default class MfaDevices extends LitElement {
               <div>
                 <input style="font-size: 32px; text-align: center;" class="form-control" type="text" name="totpCode" id="totpCode" .value="${this.totpCode}"
                   placeholder="0 0 0 0 0 0"
-                  @input="${v => this.handleTotpCode(v.target.value)}"/>
+                  @input="${v => this.handleTotpCode(v.target.value)}">
               </div>
             </div>
           </fieldset>
