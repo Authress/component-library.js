@@ -87,8 +87,6 @@ export default class MfaDevices extends LitElement {
   }
 
   async registerDevice() {
-    logger.log('Registering new device', this.deviceName);
-
     if (this.useWebAuthnDevice) {
       await this.registerWebAuthnDevice(this.deviceName);
       this.requestUpdate();
@@ -102,6 +100,7 @@ export default class MfaDevices extends LitElement {
   }
 
   async completeAuthenticatorRegistration() {
+    logger.log('Registering new Mobile Authenticator', this.deviceName);
     this.state = states.LOADING;
     this.requestUpdate();
 
@@ -116,6 +115,7 @@ export default class MfaDevices extends LitElement {
 
       if (error.code === 'NotLoggedIn' && window.location.hostname === 'localhost') {
         this.error = `Blocked due to insecure origin: ${window.location.origin}`;
+        this.requestUpdate();
         return;
       }
 
@@ -123,20 +123,24 @@ export default class MfaDevices extends LitElement {
         logger.log('Failed to register new device because the verification was incorrect.', error);
         this.error = 'The verification code was incorrect, please try again.';
         this.totpCode = null;
+        this.requestUpdate();
         return;
       }
 
       // The operation was cancelled, just ignore the error;
       if (error.message && error.message.match('The operation either timed out or was not allowed')) {
         this.error = null;
+        this.requestUpdate();
         return;
       }
       logger.error('Failed to register new device', error);
       this.error = error.message || error.data && (error.data.title || error.data.errorCode);
+      this.requestUpdate();
     }
   }
 
   async registerWebAuthnDevice(deviceName) {
+    logger.log('Registering new WebAuthN device', this.deviceName);
     this.state = states.LOADING;
     this.requestUpdate();
 
