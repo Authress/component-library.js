@@ -87,6 +87,8 @@ export default class MfaDevices extends LitElement {
   }
 
   async registerDevice() {
+    this.error = null;
+
     if (this.useWebAuthnDevice) {
       await this.registerWebAuthnDevice(this.deviceName);
       this.requestUpdate();
@@ -100,6 +102,8 @@ export default class MfaDevices extends LitElement {
   }
 
   async completeAuthenticatorRegistration() {
+    this.error = null;
+
     logger.log('Registering new Mobile Authenticator', this.deviceName);
     this.state = states.LOADING;
     this.requestUpdate();
@@ -109,6 +113,7 @@ export default class MfaDevices extends LitElement {
       const result = await loginClient.registerDevice(params);
       this.devices.push(result);
       this.state = states.LIST;
+      this.requestUpdate();
       return;
     } catch (error) {
       this.state = states.NEW_AUTHENTICATOR;
@@ -380,7 +385,7 @@ export default class MfaDevices extends LitElement {
 
   createNewDevice() {
     return html`
-    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.error = null; this.registerDevice(); }}">
+    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.registerDevice(); }}">
       <div class="mx-3 my-3">
         <div class="d-flex align-items-center justify-content-center">
           <h3 class="mx-3">Add a new device</h3>
@@ -562,6 +567,10 @@ export default class MfaDevices extends LitElement {
       totpCodeInputElement.value = replacementCode;
     }
     this.totpCode = replacementCode;
+
+    if (this.totpCode.lenth === 6) {
+      this.completeAuthenticatorRegistration();
+    }
   }
 
   displayQrCodeForNewAuthenticator() {
@@ -588,7 +597,7 @@ export default class MfaDevices extends LitElement {
     }
 
     return html`
-    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.error = null; this.completeAuthenticatorRegistration(); }}">
+    <form class="d-flex flex-column h-100" @submit="${e => { e.preventDefault(); this.completeAuthenticatorRegistration(); }}">
       <div class="mx-md-3 my-md-3">
         <div class="d-flex align-items-center justify-content-center">
           <h3 class="mx-3 d-none d-md-block">Add Mobile Authenticator</h3>
