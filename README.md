@@ -13,6 +13,9 @@ This is the Authress web component library. It provides full featured web compon
 
 
 ### Library Contents:
+* [MFA Device Management](./src/components/mfaDevices/mfaDevices.js) - Library component to automatically display a users existing MFA devices and manage them.
+* [User Profile](./src/components/userProfile/userProfile.js) - Easily display the user profile view with all their data sourced from your user's access token.
+* [Role Selector](./src/components/roleSelector/roleSelector.js) - Displays a configurable drop down which lets a user invite, share, and select user roles for other users for a specific resource. Requests can be proxied through your service or update Authress access records and permissions directly.
 * [Vanishing Keys](./src/components/vanishingKeys.js) - The UI web component that communicates with the [Authress Vanishing Keys](https://github.com/Authress/vanishing-keys) service.
 
 ## Usage
@@ -26,5 +29,8 @@ import '@authress/component-library';
 ```
 
 ```html
+<authress-mfa-devices></authress-mfa-devices>
+<authress-user-profile></authress-user-profile>
+<authress-role-selector></authress-role-selector>
 <authress-vanishing-keys></authress-vanishings-keys>
 ```
