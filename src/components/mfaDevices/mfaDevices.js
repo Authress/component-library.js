@@ -611,7 +611,7 @@ export default class MfaDevices extends LitElement {
           </fieldset>
 
           <fieldset class="mt-3">
-            <label class="input-label">2. Enter the code displayed form your device:</label>
+            <label class="input-label">2. Enter the code displayed from your device:</label>
             <div class="mt-2">
               <div>
                 <input style="font-size: 32px; text-align: center;" class="form-control" type="text" name="totpCode" id="totpCode" .value="${this.totpCode}"
