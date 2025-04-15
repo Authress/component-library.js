@@ -16,7 +16,7 @@ function getLoginClient() {
       // We skip the background credentials check because on this screen they should always already have credentials, otherwise the user should not have been directed here in the first place.
       // * And we need to avoid that to prevent the authressLoginHostUrl being set to localhost from causing a problem, and attempting to connect to localhost to load the credentials.
       // * Realistically this should be off in every case because the user should not have been asked to load mfa devices if they aren't logged in. But if the user does get here and they aren't logged in, this will be a problem, so we do at least sometimes want to refresh the auth token
-      skipBackgroundCredentialsCheck: window.location.hostname !== 'localhost' }, logger);
+      skipBackgroundCredentialsCheck: window.location.hostname === 'localhost' }, logger);
   }
 
   return cachedLoginClient;
