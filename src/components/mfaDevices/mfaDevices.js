@@ -6,7 +6,21 @@ import QRCode from 'qrcode';
 import Styles from '../../bootstrap';
 
 const logger = console;
-const loginClient = new LoginClient({ applicationId: 'app_authress-mfa-devices', authressLoginHostUrl: window.location.origin }, logger);
+
+let cachedLoginClient;
+function getLoginClient() {
+  if (!cachedLoginClient) {
+    cachedLoginClient = new LoginClient({
+      applicationId: 'app_authress-mfa-devices',
+      authressLoginHostUrl: window.location.origin,
+      // We skip the background credentials check because on this screen they should always already have credentials, otherwise the user should not have been directed here in the first place.
+      // * And we need to avoid that to prevent the authressLoginHostUrl being set to localhost from causing a problem, and attempting to connect to localhost to load the credentials.
+      // * Realistically this should be off in every case because the user should not have been asked to load mfa devices if they aren't logged in. But if the user does get here and they aren't logged in, this will be a problem, so we do at least sometimes want to refresh the auth token
+      skipBackgroundCredentialsCheck: window.location.hostname !== 'localhost' }, logger);
+  }
+
+  return cachedLoginClient;
+}
 
 const states = {
   LOADING: 'LOADING',
@@ -58,7 +72,7 @@ export default class MfaDevices extends LitElement {
   async fetchDevices() {
     try {
       // Note: this waits until there is a session before attempting to fetch devices
-      this.devices = await loginClient.getDevices();
+      this.devices = await getLoginClient().getDevices();
 
       this.state = states.LIST;
       this.requestUpdate();
@@ -74,7 +88,7 @@ export default class MfaDevices extends LitElement {
 
     setTimeout(async () => {
       try {
-        await loginClient.deleteDevice(deviceId);
+        await getLoginClient().deleteDevice(deviceId);
         this.devices = this.devices.filter(d => d.deviceId !== deviceId);
         this.state = states.LIST;
       } catch (error) {
@@ -110,7 +124,7 @@ export default class MfaDevices extends LitElement {
 
     try {
       const params = { name: this.deviceName || 'Mobile Authenticator', type: 'TOTP', totp: { secret: this.encodedSecret, verificationCode: this.totpCode } };
-      const result = await loginClient.registerDevice(params);
+      const result = await getLoginClient().registerDevice(params);
       this.devices.push(result);
       this.state = states.LIST;
       this.requestUpdate();
@@ -151,7 +165,7 @@ export default class MfaDevices extends LitElement {
 
     await new Promise(resolve => setTimeout(resolve, 10));
     try {
-      const result = await loginClient.registerDevice({ name: deviceName });
+      const result = await getLoginClient().registerDevice({ name: deviceName });
       this.devices.push(result);
       this.state = states.LIST;
       return;
@@ -575,7 +589,7 @@ export default class MfaDevices extends LitElement {
 
   displayQrCodeForNewAuthenticator() {
     const generateQrCode = async () => {
-      const userIdentity = await loginClient.getUserIdentity();
+      const userIdentity = await getLoginClient().getUserIdentity();
       const deviceString = `${userIdentity?.sub || ''} - ${this.deviceName || window.location.hostname}`;
 
       const secret = (window.crypto || window.msCrypto).getRandomValues(new Uint8Array(24));
