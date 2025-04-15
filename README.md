@@ -32,5 +32,5 @@ import '@authress/component-library';
 <authress-mfa-devices></authress-mfa-devices>
 <authress-user-profile></authress-user-profile>
 <authress-role-selector></authress-role-selector>
-<authress-vanishing-keys></authress-vanishings-keys>
+<authress-vanishing-keys secret="forced-secret-generation"></authress-vanishings-keys>
 ```

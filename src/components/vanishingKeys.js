@@ -102,40 +102,6 @@ function SetTheme() {
     </style>`;
 }
 
-async function handleClick(event) {
-  event.preventDefault();
-
-  this.loading = true;
-  const radios = this.shadowRoot.querySelectorAll('input[name="lifetime"]');
-
-  let lifetime = 'P7D';
-  for (let i = 0; i < radios.length; i++) {
-    if (radios[i].checked) {
-      lifetime = radios[i].value;
-    }
-  }
-
-  const secret = this.shadowRoot.getElementById('secret').value;
-  const specifiedPassphrase = this.shadowRoot.getElementById('passphrase').value;
-  const includePassphrase = this.shadowRoot.getElementById('includePassphrase').checked || !specifiedPassphrase;
-
-  // This is not base32 but instead base32hex: https://datatracker.ietf.org/doc/html/rfc4648#section-7
-  const base32hexMap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789';
-  const fallbackPassphrase = [...(window.crypto || window.msCrypto).getRandomValues(new Uint8Array(24))].map(val => base32hexMap[val % 32]).join('');
-  const passphrase = specifiedPassphrase || fallbackPassphrase;
-
-  const result = await encryptionManager.generateLink(secret, passphrase, includePassphrase, lifetime);
-  if (!result) {
-    return;
-  }
-
-  this.shareUrl = result;
-  this.loading = false;
-  this.showCopiedToClipBoard = false;
-
-  this.requestUpdate();
-}
-
 function resetUi(event) {
   event.preventDefault();
   this.shareUrl = null;
@@ -209,6 +175,7 @@ export default class VanishingKeys extends LitElement {
 
   static get properties() {
     return {
+      secret: { type: String, attribute: 'secret' },
       loading: { type: Boolean },
       shareUrl: { type: String },
       showResolveSecret: { type: Boolean }
@@ -384,11 +351,49 @@ export default class VanishingKeys extends LitElement {
   // Startup
   connectedCallback() {
     super.connectedCallback();
+
+    if (this.secret) {
+      setTimeout(() => {
+        this.handleClick();
+      }, 10);
+    }
   }
 
   // Cleanup
   disconnectedCallback() {
     super.disconnectedCallback();
+  }
+
+  async handleClick() {
+    this.loading = true;
+    const radios = this.shadowRoot.querySelectorAll('input[name="lifetime"]');
+  
+    let lifetime = 'P7D';
+    for (let i = 0; i < radios.length; i++) {
+      if (radios[i].checked) {
+        lifetime = radios[i].value;
+      }
+    }
+  
+    const secret = this.secret;
+    const specifiedPassphrase = this.shadowRoot.getElementById('passphrase').value;
+    const includePassphrase = this.shadowRoot.getElementById('includePassphrase').checked || !specifiedPassphrase;
+  
+    // This is not base32 but instead base32hex: https://datatracker.ietf.org/doc/html/rfc4648#section-7
+    const base32hexMap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789';
+    const fallbackPassphrase = [...(window.crypto || window.msCrypto).getRandomValues(new Uint8Array(24))].map(val => base32hexMap[val % 32]).join('');
+    const passphrase = specifiedPassphrase || fallbackPassphrase;
+  
+    const result = await encryptionManager.generateLink(secret, passphrase, includePassphrase, lifetime);
+    if (!result) {
+      return;
+    }
+  
+    this.shareUrl = result;
+    this.loading = false;
+    this.showCopiedToClipBoard = false;
+  
+    this.requestUpdate();
   }
 
   inputDisplay() {
@@ -401,10 +406,12 @@ export default class VanishingKeys extends LitElement {
               <small>And then share it securely with anyone. The secret will only be visible once and then is burned.</small>
             </div>
             <br>
-            <form @submit="${(e) => { handleClick.call(this, e); }}">
+            <form @submit="${(e) => { e.preventDefault(); this.handleClick(); }}">
               <h4 class="title">Secret:</h4>  
               <div class="text-input fs-exclude ph-no-capture" data-hj-suppress data-sl="mask">
                 <textarea id="secret" maxlength="10240" style="width: 100%; border-radius: 5px; padding: 0.5rem;" rows="4" name="secret" autocomplete="off"
+                  @change="${() => { this.secret = this.shadowRoot.getElementById('secret').value; }}"
+                  .value="${this.secret || ''}"
                   placeholder="Secret content goes here..."></textarea>
               </div>
 
@@ -479,7 +486,7 @@ export default class VanishingKeys extends LitElement {
                       <path class="st0" d="M437.026,134.798c16.52-16.52,16.52-43.304,0-59.824c-16.519-16.511-43.304-16.52-59.823,0
                         c-16.52,16.52-16.503,43.295,0,59.815C393.722,151.309,420.507,151.309,437.026,134.798z"/>
                     </g>
-                    </svg>` : 'Generate one time secret link'}
+                    </svg>` : 'Generate one time link'}
                   </button>
                 </div>
               </div>
