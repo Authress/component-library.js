@@ -639,7 +639,7 @@ export default class MfaDevices extends LitElement {
 
       <div class="d-flex flex-grow-1 justify-content-around mt-2">
         <div class="d-flex align-items-center">
-          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.state = states.NEW; this.requestUpdate(); }}">
+          <button type="button" style="width: 75px; height: 88px" class="back-button btn btn-sm" @click="${() => { this.state = states.NEW; this.useWebAuthnDevice = true; this.requestUpdate(); }}">
             ${GO_BACK}
           </button>
         </div>
