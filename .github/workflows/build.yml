@@ -27,10 +27,11 @@ jobs:
     - name: Run build
       run: yarn build
     - name: Deploy to NPM
-      if: github.ref != 'refs/heads/main' && github.event_name == 'push'
-      run: npm publish --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+      if: github.repository_owner == 'Authress' && github.ref != 'refs/heads/main' && github.event_name == 'push'
+      # Version 11.5.1 or later is required for npm publish
+      run: |
+        npm install -g npm@11.5.1
+        npm publish --access public
 
     - name: After build
       if: github.ref != 'refs/heads/main' && github.event_name == 'push'
@@ -38,7 +39,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: node make.js after_build
     - name: Create Github Release and Tag
-      if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' && github.event_name == 'push'
+      if: github.ref != 'refs/heads/main' && github.event_name == 'push'
       run: |
         git tag ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
         git push origin ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
